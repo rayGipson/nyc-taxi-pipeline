@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: taxi_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-dataeng}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-taxi_analytics}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-dataeng}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - taxi_network
+
+  pipeline:
+    build:
+      context: .
+      dockerfile: docker/python/Dockerfile
+    container_name: taxi_pipeline
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-dataeng}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-taxi_analytics}
+      DATA_DIR: /app/data
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    volumes:
+      - ./src:/app/src:ro
+      - ./data:/app/data
+      - ./config:/app/config:ro
+      - ./tests:/app/tests:ro
+    working_dir: /app
+    networks:
+      - taxi_network
+
+volumes:
+  postgres_data:
+
+networks:
+  taxi_network:
+    driver: bridge

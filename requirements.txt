@@ -1,0 +1,27 @@
+# Core dependencies
+pandas==2.1.4
+numpy==1.26.3
+psycopg2-binary==2.9.9
+python-dotenv==1.0.0
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# Data formats
+pyarrow==14.0.2
+
+# HTTP
+requests==2.31.0
+
+# Testing
+pytest==7.4.3
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+
+# Logging
+pyyaml==6.0.1
+pytest-cov==4.1.0
+
+# Testing dependencies
+pytest==7.4.3
+pytest-cov==4.1.0
+pytest-mock==3.12.0
